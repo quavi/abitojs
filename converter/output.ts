@@ -6,49 +6,62 @@ export default class BaseContract {
   contract: Contract
   abi: any[]
 
+  OnNewPurchaseListener: any
+  OnPresaleEndedListener: any
+  OnPresaleUpdatedListener: any
+  OnProceedsClaimedListener: any
+  OwnershipTransferredListener: any
+
   constructor(_web3: Web3, _contractAddress: string) {
     this.web3 = _web3
     this.abi = [
-      { inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
+      {
+        inputs: [
+          { internalType: 'address', name: '_invoker', type: 'address' },
+          { internalType: 'address', name: '_tokenAddress', type: 'address' },
+          {
+            internalType: 'address',
+            name: '_recipientWallet',
+            type: 'address',
+          },
+          { internalType: 'uint256', name: '_taxPercentage', type: 'uint256' },
+        ],
+        stateMutability: 'nonpayable',
+        type: 'constructor',
+      },
       {
         anonymous: false,
         inputs: [
           {
-            indexed: true,
+            indexed: false,
             internalType: 'address',
-            name: 'owner',
-            type: 'address',
-          },
-          {
-            indexed: true,
-            internalType: 'address',
-            name: 'spender',
+            name: 'buyer',
             type: 'address',
           },
           {
             indexed: false,
             internalType: 'uint256',
-            name: 'value',
+            name: 'amount',
+            type: 'uint256',
+          },
+          {
+            indexed: false,
+            internalType: 'uint256',
+            name: 'time',
             type: 'uint256',
           },
         ],
-        name: 'Approval',
+        name: 'OnNewPurchase',
         type: 'event',
       },
+      { anonymous: false, inputs: [], name: 'OnPresaleEnded', type: 'event' },
+      { anonymous: false, inputs: [], name: 'OnPresaleUpdated', type: 'event' },
       {
         anonymous: false,
-        inputs: [
-          {
-            indexed: false,
-            internalType: 'bool',
-            name: 'enabled',
-            type: 'bool',
-          },
-        ],
-        name: 'BuyBackEnabledUpdated',
+        inputs: [],
+        name: 'OnProceedsClaimed',
         type: 'event',
       },
-      { anonymous: false, inputs: [], name: 'OnVotingEnabled', type: 'event' },
       {
         anonymous: false,
         inputs: [
@@ -69,376 +82,108 @@ export default class BaseContract {
         type: 'event',
       },
       {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: false,
-            internalType: 'uint256',
-            name: 'tokenAmount',
-            type: 'uint256',
-          },
-        ],
-        name: 'RewardLiquidityProviders',
-        type: 'event',
-      },
-      {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: false,
-            internalType: 'uint256',
-            name: 'tokensSwapped',
-            type: 'uint256',
-          },
-          {
-            indexed: false,
-            internalType: 'uint256',
-            name: 'ethReceived',
-            type: 'uint256',
-          },
-          {
-            indexed: false,
-            internalType: 'uint256',
-            name: 'tokensIntoLiqudity',
-            type: 'uint256',
-          },
-        ],
-        name: 'SwapAndLiquify',
-        type: 'event',
-      },
-      {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: false,
-            internalType: 'bool',
-            name: 'enabled',
-            type: 'bool',
-          },
-        ],
-        name: 'SwapAndLiquifyEnabledUpdated',
-        type: 'event',
-      },
-      {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: false,
-            internalType: 'uint256',
-            name: 'amountIn',
-            type: 'uint256',
-          },
-          {
-            indexed: false,
-            internalType: 'address[]',
-            name: 'path',
-            type: 'address[]',
-          },
-        ],
-        name: 'SwapETHForTokens',
-        type: 'event',
-      },
-      {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: false,
-            internalType: 'uint256',
-            name: 'amountIn',
-            type: 'uint256',
-          },
-          {
-            indexed: false,
-            internalType: 'address[]',
-            name: 'path',
-            type: 'address[]',
-          },
-        ],
-        name: 'SwapTokensForETH',
-        type: 'event',
-      },
-      {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: true,
-            internalType: 'address',
-            name: 'from',
-            type: 'address',
-          },
-          {
-            indexed: true,
-            internalType: 'address',
-            name: 'to',
-            type: 'address',
-          },
-          {
-            indexed: false,
-            internalType: 'uint256',
-            name: 'value',
-            type: 'uint256',
-          },
-        ],
-        name: 'Transfer',
-        type: 'event',
-      },
-      {
         inputs: [],
-        name: '_liquidityFee',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: '_maxTxAmount',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: '_taxFee',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'afterPreSale',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'address', name: 'owner', type: 'address' },
-          { internalType: 'address', name: 'spender', type: 'address' },
-        ],
-        name: 'allowance',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'address', name: 'spender', type: 'address' },
-          { internalType: 'uint256', name: 'amount', type: 'uint256' },
-        ],
-        name: 'approve',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-        name: 'balanceOf',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'buyBackEnabled',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'buyBackUpperLimitAmount',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'buybackDuration',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'buybackEnabledUntil',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'buybackPercentage',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'deadAddress',
+        name: '_owner',
         outputs: [{ internalType: 'address', name: '', type: 'address' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'decimals',
-        outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
-        stateMutability: 'pure',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'address', name: 'spender', type: 'address' },
-          { internalType: 'uint256', name: 'subtractedValue', type: 'uint256' },
-        ],
-        name: 'decreaseAllowance',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'uint256', name: 'tAmount', type: 'uint256' }],
-        name: 'deliver',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'enableVoting',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'uint256', name: 'amount', type: 'uint256' }],
-        name: 'estimateBuybackValue',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-        name: 'excludeFromFee',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-        name: 'excludeFromReward',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'getTime',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'getUnlockTime',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-        name: 'includeInFee',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-        name: 'includeInReward',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'address', name: 'spender', type: 'address' },
-          { internalType: 'uint256', name: 'addedValue', type: 'uint256' },
-        ],
-        name: 'increaseAllowance',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'isBuybackEnabledThroughVoting',
+        name: 'bnbClaimed',
         outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-        name: 'isExcludedFromFee',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-        name: 'isExcludedFromReward',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'uint256', name: 'time', type: 'uint256' }],
-        name: 'lock',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'marketingAddress',
-        outputs: [
-          { internalType: 'address payable', name: '', type: 'address' },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'marketingDivisor',
+        inputs: [{ internalType: 'address', name: '', type: 'address' }],
+        name: 'bnbDeposited',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'minBalanceToAllowVoting',
+        name: 'claimDate',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'minNumberOfHoldersToAllowVoting',
+        name: 'endDate',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'minimumTokensBeforeSwapAmount',
+        name: 'maxAmount',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'name',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
-        stateMutability: 'pure',
+        name: 'minAmount',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [{ internalType: 'address', name: '', type: 'address' }],
+        name: 'receipt',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'startDate',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'taxPercentage',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'tokenAddress',
+        outputs: [{ internalType: 'address', name: '', type: 'address' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'totalAmountBought',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'totalDepositedTokens',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'totalPriceOfDepositedTokens',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'totalTokensClaimed',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
         type: 'function',
       },
       {
@@ -450,247 +195,8 @@ export default class BaseContract {
       },
       {
         inputs: [],
-        name: 'prepareForPreSale',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'uint256', name: 'tAmount', type: 'uint256' },
-          { internalType: 'bool', name: 'deductTransferFee', type: 'bool' },
-        ],
-        name: 'reflectionFromToken',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'remainingTimeInBuyback',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'remainingTimeInVoting',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
         name: 'renounceOwnership',
         outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'requiredVotes',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'bool', name: '_enabled', type: 'bool' }],
-        name: 'setBuyBackEnabled',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'uint256', name: 'duration', type: 'uint256' },
-        ],
-        name: 'setBuybackDuration',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'uint256', name: 'time', type: 'uint256' }],
-        name: 'setBuybackEnabledUntil',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'uint256', name: 'percentage', type: 'uint256' },
-        ],
-        name: 'setBuybackPercentage',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'uint256', name: 'buyBackLimit', type: 'uint256' },
-        ],
-        name: 'setBuybackUpperLimit',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'uint256', name: 'liquidityFee', type: 'uint256' },
-        ],
-        name: 'setLiquidityFeePercent',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          {
-            internalType: 'address',
-            name: '_marketingAddress',
-            type: 'address',
-          },
-        ],
-        name: 'setMarketingAddress',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'uint256', name: 'divisor', type: 'uint256' }],
-        name: 'setMarketingDivisor',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'uint256', name: 'maxTxAmount', type: 'uint256' },
-        ],
-        name: 'setMaxTxAmount',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'uint256', name: 'min', type: 'uint256' }],
-        name: 'setMinBalancetoAlowVoting',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          {
-            internalType: 'uint256',
-            name: '_minimumTokensBeforeSwap',
-            type: 'uint256',
-          },
-        ],
-        name: 'setMinimumTokensBeforeSwap',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'bool', name: '_enabled', type: 'bool' }],
-        name: 'setSwapAndLiquifyEnabled',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'uint256', name: 'taxFee', type: 'uint256' }],
-        name: 'setTaxFeePercent',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'uint256', name: 'time', type: 'uint256' }],
-        name: 'setTimeBetweenEachVote',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'uint256', name: 'percentage', type: 'uint256' },
-        ],
-        name: 'setVotePercentageRequired',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'uint256', name: 'duration', type: 'uint256' },
-        ],
-        name: 'setVotingDuration',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'uint256', name: 'min', type: 'uint256' }],
-        name: 'setminNumberOfHoldersToAllowVoting',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'swapAndLiquifyEnabled',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'symbol',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
-        stateMutability: 'pure',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'uint256', name: 'rAmount', type: 'uint256' }],
-        name: 'tokenFromReflection',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'totalFees',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'totalSupply',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'address', name: 'recipient', type: 'address' },
-          { internalType: 'uint256', name: 'amount', type: 'uint256' },
-        ],
-        name: 'transfer',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [
-          { internalType: 'address', name: 'sender', type: 'address' },
-          { internalType: 'address', name: 'recipient', type: 'address' },
-          { internalType: 'uint256', name: 'amount', type: 'uint256' },
-        ],
-        name: 'transferFrom',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'nonpayable',
         type: 'function',
       },
@@ -705,28 +211,23 @@ export default class BaseContract {
       },
       {
         inputs: [],
-        name: 'uniswapV2Pair',
-        outputs: [
-          {
-            internalType: 'contract IUniswapV2Pair',
-            name: '',
-            type: 'address',
-          },
-        ],
+        name: 'getUnlockTime',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'uniswapV2Router',
-        outputs: [
-          {
-            internalType: 'contract IUniswapV2Router02',
-            name: '',
-            type: 'address',
-          },
-        ],
+        name: 'getTime',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [{ internalType: 'uint256', name: 'time', type: 'uint256' }],
+        name: 'lock',
+        outputs: [],
+        stateMutability: 'nonpayable',
         type: 'function',
       },
       {
@@ -738,125 +239,308 @@ export default class BaseContract {
       },
       {
         inputs: [],
-        name: 'vote',
+        name: 'withdrawTokens',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [
+          {
+            internalType: 'uint256',
+            name: '_totalPriceOfDepositedTokens',
+            type: 'uint256',
+          },
+          { internalType: 'uint256', name: '_minAmount', type: 'uint256' },
+          { internalType: 'uint256', name: '_maxAmount', type: 'uint256' },
+          { internalType: 'uint256', name: '_startDate', type: 'uint256' },
+          { internalType: 'uint256', name: '_endDate', type: 'uint256' },
+          { internalType: 'uint256', name: '_claimDate', type: 'uint256' },
+        ],
+        name: 'startPresale',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'startPresaleNow',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'votePercentageRequired',
+        name: 'endPresaleNow',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'launchNow',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [
+          { internalType: 'uint256', name: '_endDate', type: 'uint256' },
+        ],
+        name: 'updatePresaleEndDate',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [
+          { internalType: 'uint256', name: '_claimDate', type: 'uint256' },
+        ],
+        name: 'updateClaimDate',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [
+          { internalType: 'uint256', name: 'extension', type: 'uint256' },
+        ],
+        name: 'extendPresaleEndDate',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [
+          { internalType: 'uint256', name: 'extension', type: 'uint256' },
+        ],
+        name: 'extendPresaleClaimDate',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'claimBnb',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'bnbEarnedBySeller',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'votersCount',
+        name: 'totalTax',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'votesCount',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [{ internalType: 'address', name: '', type: 'address' }],
-        name: 'votesTime',
+        name: 'unsoldTokens',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'votingDuration',
+        name: 'buy',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'cancelPurchase',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [
+          { internalType: 'uint256', name: 'bnbAmount', type: 'uint256' },
+        ],
+        name: 'estimateClaimableTokens',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
       },
       {
         inputs: [],
-        name: 'votingStart',
+        name: 'claimableTokens',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
       },
-      { stateMutability: 'payable', type: 'receive' },
+      {
+        inputs: [],
+        name: 'claimTokens',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'presaleEnded',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'presaleStarted',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'claimable',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+      {
+        inputs: [],
+        name: 'percentSold',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
     ]
     this.contract = new _web3.eth.Contract(this.abi, _contractAddress)
   }
 
-  _liquidityFee() {
+  _owner() {
     return new Promise<string>(async (resolve, reject) => {
       try {
-        return resolve(await this.contract.methods._liquidityFee().call())
+        return resolve(await this.contract.methods._owner().call())
       } catch (error) {
         reject(error)
       }
     })
   }
 
-  _maxTxAmount() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods._maxTxAmount().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  _taxFee() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods._taxFee().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  allowance(owner: string, spender: string) {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(
-          await this.contract.methods.allowance(owner, spender).call()
-        )
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  balanceOf(account: string) {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.balanceOf(account).call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  buyBackEnabled() {
+  bnbClaimed() {
     return new Promise<boolean>(async (resolve, reject) => {
       try {
-        return resolve(await this.contract.methods.buyBackEnabled().call())
+        return resolve(await this.contract.methods.bnbClaimed().call())
       } catch (error) {
         reject(error)
       }
     })
   }
 
-  buyBackUpperLimitAmount() {
+  bnbDeposited(address: string) {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.bnbDeposited(address).call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  claimDate() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.claimDate().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  endDate() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.endDate().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  maxAmount() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.maxAmount().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  minAmount() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.minAmount().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  receipt(address: string) {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.receipt(address).call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  startDate() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.startDate().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  taxPercentage() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.taxPercentage().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  tokenAddress() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.tokenAddress().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  totalAmountBought() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.totalAmountBought().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  totalDepositedTokens() {
     return new Promise<string>(async (resolve, reject) => {
       try {
         return resolve(
-          await this.contract.methods.buyBackUpperLimitAmount().call()
+          await this.contract.methods.totalDepositedTokens().call()
         )
       } catch (error) {
         reject(error)
@@ -864,51 +548,11 @@ export default class BaseContract {
     })
   }
 
-  buybackDuration() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.buybackDuration().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  buybackEnabledUntil() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.buybackEnabledUntil().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  buybackPercentage() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.buybackPercentage().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  deadAddress() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.deadAddress().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  estimateBuybackValue(amount: string) {
+  totalPriceOfDepositedTokens() {
     return new Promise<string>(async (resolve, reject) => {
       try {
         return resolve(
-          await this.contract.methods.estimateBuybackValue(amount).call()
+          await this.contract.methods.totalPriceOfDepositedTokens().call()
         )
       } catch (error) {
         reject(error)
@@ -916,112 +560,10 @@ export default class BaseContract {
     })
   }
 
-  getTime() {
+  totalTokensClaimed() {
     return new Promise<string>(async (resolve, reject) => {
       try {
-        return resolve(await this.contract.methods.getTime().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  getUnlockTime() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.getUnlockTime().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  isBuybackEnabledThroughVoting() {
-    return new Promise<boolean>(async (resolve, reject) => {
-      try {
-        return resolve(
-          await this.contract.methods.isBuybackEnabledThroughVoting().call()
-        )
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  isExcludedFromFee(account: string) {
-    return new Promise<boolean>(async (resolve, reject) => {
-      try {
-        return resolve(
-          await this.contract.methods.isExcludedFromFee(account).call()
-        )
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  isExcludedFromReward(account: string) {
-    return new Promise<boolean>(async (resolve, reject) => {
-      try {
-        return resolve(
-          await this.contract.methods.isExcludedFromReward(account).call()
-        )
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  marketingAddress() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.marketingAddress().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  marketingDivisor() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.marketingDivisor().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  minBalanceToAllowVoting() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(
-          await this.contract.methods.minBalanceToAllowVoting().call()
-        )
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  minNumberOfHoldersToAllowVoting() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(
-          await this.contract.methods.minNumberOfHoldersToAllowVoting().call()
-        )
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  minimumTokensBeforeSwapAmount() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(
-          await this.contract.methods.minimumTokensBeforeSwapAmount().call()
-        )
+        return resolve(await this.contract.methods.totalTokensClaimed().call())
       } catch (error) {
         reject(error)
       }
@@ -1038,13 +580,61 @@ export default class BaseContract {
     })
   }
 
-  reflectionFromToken(tAmount: string, deductTransferFee: string) {
+  getUnlockTime() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.getUnlockTime().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  getTime() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.getTime().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  bnbEarnedBySeller() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.bnbEarnedBySeller().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  totalTax() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.totalTax().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  unsoldTokens() {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        return resolve(await this.contract.methods.unsoldTokens().call())
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  estimateClaimableTokens(bnbAmount: string) {
     return new Promise<string>(async (resolve, reject) => {
       try {
         return resolve(
-          await this.contract.methods
-            .reflectionFromToken(tAmount, deductTransferFee)
-            .call()
+          await this.contract.methods.estimateClaimableTokens(bnbAmount).call()
         )
       } catch (error) {
         reject(error)
@@ -1052,164 +642,146 @@ export default class BaseContract {
     })
   }
 
-  remainingTimeInBuyback() {
+  claimableTokens() {
     return new Promise<string>(async (resolve, reject) => {
       try {
-        return resolve(
-          await this.contract.methods.remainingTimeInBuyback().call()
-        )
+        return resolve(await this.contract.methods.claimableTokens().call())
       } catch (error) {
         reject(error)
       }
     })
   }
 
-  remainingTimeInVoting() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(
-          await this.contract.methods.remainingTimeInVoting().call()
-        )
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  requiredVotes() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.requiredVotes().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  swapAndLiquifyEnabled() {
+  presaleEnded() {
     return new Promise<boolean>(async (resolve, reject) => {
       try {
-        return resolve(
-          await this.contract.methods.swapAndLiquifyEnabled().call()
-        )
+        return resolve(await this.contract.methods.presaleEnded().call())
       } catch (error) {
         reject(error)
       }
     })
   }
 
-  tokenFromReflection(rAmount: string) {
-    return new Promise<string>(async (resolve, reject) => {
+  presaleStarted() {
+    return new Promise<boolean>(async (resolve, reject) => {
       try {
-        return resolve(
-          await this.contract.methods.tokenFromReflection(rAmount).call()
-        )
+        return resolve(await this.contract.methods.presaleStarted().call())
       } catch (error) {
         reject(error)
       }
     })
   }
 
-  totalFees() {
-    return new Promise<string>(async (resolve, reject) => {
+  claimable() {
+    return new Promise<boolean>(async (resolve, reject) => {
       try {
-        return resolve(await this.contract.methods.totalFees().call())
+        return resolve(await this.contract.methods.claimable().call())
       } catch (error) {
         reject(error)
       }
     })
   }
 
-  totalSupply() {
+  percentSold() {
     return new Promise<string>(async (resolve, reject) => {
       try {
-        return resolve(await this.contract.methods.totalSupply().call())
+        return resolve(await this.contract.methods.percentSold().call())
       } catch (error) {
         reject(error)
       }
     })
   }
 
-  uniswapV2Pair() {
-    return new Promise<string>(async (resolve, reject) => {
+  async buy($amount: string) {
+    return new Promise<void>(async (resolve, reject) => {
       try {
-        return resolve(await this.contract.methods.uniswapV2Pair().call())
+        let tx = this.contract.methods.buy($amount)
+        await this.sendTransaction(tx, $amount)
+        resolve()
       } catch (error) {
-        reject(error)
+        reject()
       }
     })
   }
-
-  uniswapV2Router() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.uniswapV2Router().call())
-      } catch (error) {
-        reject(error)
+  onNewPurchase(fun: Function, block = 0) {
+    this.OnNewPurchaseListener = this.contract.events.OnNewPurchase(
+      {
+        fromBlock: block,
+      },
+      function (_: any, event: any) {
+        fun(event)
       }
-    })
+    )
   }
 
-  votePercentageRequired() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(
-          await this.contract.methods.votePercentageRequired().call()
-        )
-      } catch (error) {
-        reject(error)
-      }
-    })
+  unsubscribeOnNewPurchaseListener() {
+    this.OnNewPurchaseListener.unsubscribe()
+    this.OnNewPurchaseListener = null
   }
 
-  votersCount() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.votersCount().call())
-      } catch (error) {
-        reject(error)
+  onPresaleEnded(fun: Function, block = 0) {
+    this.OnPresaleEndedListener = this.contract.events.OnPresaleEnded(
+      {
+        fromBlock: block,
+      },
+      function (_: any, event: any) {
+        fun(event)
       }
-    })
+    )
   }
 
-  votesCount() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.votesCount().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
+  unsubscribeOnPresaleEndedListener() {
+    this.OnPresaleEndedListener.unsubscribe()
+    this.OnPresaleEndedListener = null
   }
 
-  votesTime(address: string) {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.votesTime(address).call())
-      } catch (error) {
-        reject(error)
+  onPresaleUpdated(fun: Function, block = 0) {
+    this.OnPresaleUpdatedListener = this.contract.events.OnPresaleUpdated(
+      {
+        fromBlock: block,
+      },
+      function (_: any, event: any) {
+        fun(event)
       }
-    })
+    )
   }
 
-  votingDuration() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.votingDuration().call())
-      } catch (error) {
-        reject(error)
-      }
-    })
+  unsubscribeOnPresaleUpdatedListener() {
+    this.OnPresaleUpdatedListener.unsubscribe()
+    this.OnPresaleUpdatedListener = null
   }
 
-  votingStart() {
-    return new Promise<string>(async (resolve, reject) => {
-      try {
-        return resolve(await this.contract.methods.votingStart().call())
-      } catch (error) {
-        reject(error)
+  onProceedsClaimed(fun: Function, block = 0) {
+    this.OnProceedsClaimedListener = this.contract.events.OnProceedsClaimed(
+      {
+        fromBlock: block,
+      },
+      function (_: any, event: any) {
+        fun(event)
       }
-    })
+    )
+  }
+
+  unsubscribeOnProceedsClaimedListener() {
+    this.OnProceedsClaimedListener.unsubscribe()
+    this.OnProceedsClaimedListener = null
+  }
+
+  ownershipTransferred(fun: Function, block = 0) {
+    this.OwnershipTransferredListener =
+      this.contract.events.OwnershipTransferred(
+        {
+          fromBlock: block,
+        },
+        function (_: any, event: any) {
+          fun(event)
+        }
+      )
+  }
+
+  unsubscribeOwnershipTransferredListener() {
+    this.OwnershipTransferredListener.unsubscribe()
+    this.OwnershipTransferredListener = null
   }
 
   account() {

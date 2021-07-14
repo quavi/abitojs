@@ -11,7 +11,6 @@
 <script lang="ts">
 import { convertAbiToTs } from '~/converter/Converter'
 import Vue from 'vue'
-import abi from '../test-data/abi'
 export default Vue.extend({
   data: () => ({
     input: '',

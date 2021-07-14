@@ -8,6 +8,7 @@ const buildTransactionFunction = (
 
   if (params.endsWith('$amount')) {
     transactions += `$amount`
+    params = params.replace('$amount', '')
   }
 
   let template = `async $$functionName($$paramsWithType) {

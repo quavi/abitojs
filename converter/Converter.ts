@@ -1,4 +1,5 @@
 import ContractTemplate from './ContractTemplate'
+import { buildEventListenerFunction } from './EventListenerTemplateBuilder'
 import { buildTransactionFunction } from './TransactionTemplateBuilder'
 import { buildReadOnlyFunction } from './ViewTemplateBuilder'
 
@@ -7,6 +8,8 @@ const convertAbiToTs = (abi: any[]) => {
   let readOnlyFunctions = ''
   let nonPayableFunctions = ''
   let payableFunctions = ''
+  let events = ''
+  let eventFunctions = ''
 
   abi.forEach((field: any) => {
     if (field.type == 'function') {
@@ -29,7 +32,7 @@ const convertAbiToTs = (abi: any[]) => {
         )
       } else if (
         field.stateMutability == 'payable' ||
-        field.stateMutability == 'nonPayable'
+        field.stateMutability == 'nonpayable'
       ) {
         if (field.stateMutability == 'payable') {
           functionParamsWithTypes += `$amount: string`
@@ -47,8 +50,15 @@ const convertAbiToTs = (abi: any[]) => {
         else if (field.stateMutability == 'nonpayable') nonPayableFunctions += t
       }
     } else if (field.type == 'event') {
+      let e = field.name.charAt(0).toLowerCase() + field.name.slice(1)
+      events += `${e}Listener: any;\n`
+      eventFunctions += buildEventListenerFunction(field.name)
     }
   })
+
+  console.log(payableFunctions, nonPayableFunctions)
+
+  conversion = conversion.split('$$events').join(events + '')
 
   conversion = conversion
     .split('$$placeholder')
@@ -58,7 +68,11 @@ const convertAbiToTs = (abi: any[]) => {
     .split('$$placeholder')
     .join(payableFunctions + `$$placeholder`)
 
-  conversion = conversion.split('$$placeholder').join(nonPayableFunctions)
+  conversion = conversion
+    .split('$$placeholder')
+    .join(nonPayableFunctions + `$$placeholder`)
+
+  conversion = conversion.split('$$placeholder').join(eventFunctions)
 
   conversion = conversion.replace('$$abi', JSON.stringify(abi))
 

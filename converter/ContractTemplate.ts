@@ -4,7 +4,9 @@ import { Contract } from 'web3-eth-contract';
 export default class BaseContract {
   web3: Web3;
   contract: Contract;
-  abi: any[]
+  abi: any[];
+
+  $$events
 
   constructor(_web3: Web3, _contractAddress: string) {
     this.web3 = _web3;
@@ -29,7 +31,7 @@ export default class BaseContract {
         };
         if (value) {
           //@ts-ignore
-          opts.value = this.web3.utils.toWei(value.toString(), 'ether');
+          opts.value = value;
         }
         let gas = await tx.estimateGas(opts);
         let gasPrice = await this.web3.eth.getGasPrice();
