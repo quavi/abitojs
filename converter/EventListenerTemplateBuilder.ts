@@ -2,7 +2,7 @@ const buildEventListenerFunction = (eventName: string) => {
   let e = eventName.charAt(0).toLowerCase() + eventName.slice(1)
 
   let template = `
-  ${e}(fun: Function, block = 0) {
+  on${eventName}(fun: Function, block = 0) {
     this.${e}Listener = this.contract.events.$$eventName(
       {
         fromBlock: block,
