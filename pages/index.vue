@@ -12,6 +12,7 @@
 import { convertAbiToTs } from '~/converter/Converter'
 import Vue from 'vue'
 export default Vue.extend({
+  layout: 'plain',
   data: () => ({
     input: '',
     output: '',
